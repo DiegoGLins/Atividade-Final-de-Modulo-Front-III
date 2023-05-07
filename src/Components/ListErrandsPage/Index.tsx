@@ -11,16 +11,17 @@ import { removeErrands } from '../../store/modules/ListErrandsSlice';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { getUserErrands } from '../GetErrands';
 
 const ListErrands: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const userErrands= useAppSelector(state => state.users.loggedUser.errands);
+
   const [errandsLocal, setErrandsLocal] = useState<ErrandsType[]>([]);
 
-  // useEffect(() => {
-  //   setErrandsLocal([...errands]);
-  // }, [errands]);
+  useEffect(() => {
+    setErrandsLocal([...userErrands]);
+  }, [userErrands]);
 
   const handleDelete = (itemDelete: ErrandsType) => {
     dispatch(removeErrands(itemDelete.errandsId));
@@ -31,10 +32,8 @@ const ListErrands: React.FC = () => {
   };
 
 
-  const userLogged = useAppSelector(state => state.users.loggedUser);
-
   const ErrandsMemo = useMemo(() => {
-    return getUserErrands(userLogged).map((item: ErrandsType) => {
+    return userErrands.map((item: ErrandsType) => {
       return (
         <React.Fragment key={item.errandsId}>
           <ListItem
