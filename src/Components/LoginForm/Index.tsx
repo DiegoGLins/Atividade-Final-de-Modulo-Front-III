@@ -4,8 +4,9 @@ import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { selectAll } from '../../store/modules/ListErrandsSlice';
+import UserRegisterType from '../../types/UserRegisterType';
 import { login } from '../../store/modules/RegisterUserSlice';
-
 
 const LoginForm = () => {
   const [accessLogin, setAccessLogin] = useState<string>('');
@@ -13,7 +14,7 @@ const LoginForm = () => {
   const [openSnap, setOpenSnap] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  // const AllErrands = useAppSelector(selectAll);
+  const AllErrands = useAppSelector(selectAll);
   const AllUsers = useAppSelector(state => state.users.items);
 
   const dispatch = useAppDispatch();
@@ -22,14 +23,18 @@ const LoginForm = () => {
     const LoginUser = AllUsers.find(items => items.email === accessLogin);
 
     if (LoginUser && LoginUser.password === accessPassword) {
-      // const ErrandsUser = AllErrands.filter(item => item.userId === LoginUser.email); 
-      dispatch(login(accessLogin));
+      const errandsUser = AllErrands.filter(item => item.userId === LoginUser.email);
+      const userLogged: UserRegisterType = {
+        email: accessLogin,
+        password: accessPassword,
+        errands: errandsUser
+      };
+      dispatch(login(userLogged));
       navigate('/register-errands');
     } else {
       setOpenSnap(true);
     }
   };
-
 
   return (
     <FormControl>
@@ -41,7 +46,8 @@ const LoginForm = () => {
           <TitleStyled>Entrar no sistema</TitleStyled>
         </Grid>
         <Grid item xs={8}>
-          <TextField required
+          <TextField
+            required
             onChange={e => setAccessLogin(e.target.value)}
             fullWidth
             type="email"
@@ -50,7 +56,8 @@ const LoginForm = () => {
           ></TextField>
         </Grid>
         <Grid item xs={8}>
-          <TextField required
+          <TextField
+            required
             onChange={e => setAccessPassword(e.target.value)}
             fullWidth
             type="password"
