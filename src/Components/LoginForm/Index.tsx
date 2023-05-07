@@ -4,8 +4,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { login } from '../../store/modules/RegisterUserSlice';
-
+import { selectAll } from '../../store/modules/ListErrandsSlice';
+import { loggeds, add } from '../../store/modules/UserLoggedSlice';
 
 const LoginForm = () => {
   const [accessLogin, setAccessLogin] = useState<string>('');
@@ -13,7 +13,7 @@ const LoginForm = () => {
   const [openSnap, setOpenSnap] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  // const AllErrands = useAppSelector(selectAll);
+  const AllErrands = useAppSelector(selectAll);
   const AllUsers = useAppSelector(state => state.users.items);
 
   const dispatch = useAppDispatch();
@@ -22,11 +22,11 @@ const LoginForm = () => {
     const LoginUser = AllUsers.find(items => items.email === accessLogin);
 
     if (LoginUser && LoginUser.password === accessPassword) {
-      // const ErrandsUser = AllErrands.filter(item => item.userId === LoginUser.email); 
-      dispatch(login(accessLogin));
+      const ErrandsUser = AllErrands.filter(item => item.userId === LoginUser.email); 
+      dispatch(loggeds());
       navigate('/register-errands');
     } else {
-      setOpenSnap(true);
+      setOpenSnap(true);lhlhlhl
     }
   };
 
