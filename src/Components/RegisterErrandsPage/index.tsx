@@ -6,7 +6,8 @@ import ErrandsType from '../../types/ErrandsType';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import generateErrandsID from '../../utils/generateErrandsID';
-import { add } from '../../store/modules/UserLoggedSlice';
+import { add } from '../../store/modules/RegisterUserSlice';
+
 
 const RegisterErrandsForm: React.FC = () => {
   const dispatch = useAppDispatch();
