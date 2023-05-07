@@ -1,0 +1,10 @@
+.TitleRegister {
+  color: #14c036;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.TitleRegister:hover {
+  color: #f89a17;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  transform: scale(1.1);
+}
