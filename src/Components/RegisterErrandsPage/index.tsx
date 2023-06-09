@@ -1,24 +1,41 @@
 import { Grid, TextField, Button, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { addErrands } from '../../store/modules/ListErrandsSlice';
-import ErrandsType from '../../types/ErrandsType';
 import React from 'react';
+import generateID from '../../utils/generateErrandsID';
+import { addAllErrands, addErrand, selectAll } from '../../store/modules/ListErrandsSlice';
+import { selectById, updateUser } from '../../store/modules/registerUserSlice';
 import { useNavigate } from 'react-router-dom';
-import generateErrandsID from '../../utils/generateErrandsID';
-import { add } from '../../store/modules/RegisterUserSlice';
-
 
 const RegisterErrandsForm: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const userLogged = useAppSelector(state => state.userLogged);
-
   const [description, setDescription] = useState<string>('');
   const [details, setDetails] = useState<string>('');
 
   const [descriptionError, setDescriptionError] = useState<boolean>(false);
   const [detailsError, setDetailsError] = useState<boolean>(false);
+
+  const userReduxLogged = useAppSelector(state => state.userLogged);
+  const userRedux = useAppSelector(state => selectById(state, userReduxLogged));
+
+  const errandRedux = useAppSelector(selectAll);
+
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userRedux?.errands) {
+      dispatch(addAllErrands(userRedux.errands));
+    }
+  }, []);
+
+  useEffect(() => {
+    dispatch(
+      updateUser({
+        id: userReduxLogged,
+        changes: { errands: errandRedux }
+      })
+    );
+  }, [errandRedux]);
 
   useEffect(() => {
     if (description.length) {
@@ -44,24 +61,32 @@ const RegisterErrandsForm: React.FC = () => {
     }
   }, [details]);
 
+  useEffect(() => {
+    if (!userReduxLogged) {
+      navigate('/');
+    }
+  }, [userReduxLogged]);
+
   const ClearErrands = () => {
     setDescription('');
     setDetails('');
   };
 
   const AddErrands = () => {
-    const errandsUser: ErrandsType = { userId: userLogged.email, errandsId: generateErrandsID(), description, details };
-    dispatch(addErrands(errandsUser));
-    dispatch(add(errandsUser));
-    navigate('/list-errands');
-
+    dispatch(
+      addErrand({
+        errandId: generateID(),
+        description,
+        details
+      })
+    );
     ClearErrands();
   };
 
   return (
-    <Grid container spacing={2} sx={{ marginTop: '50px' }} justifyContent="center">
-      <Typography variant="h6">Adicionar novo recado</Typography>
-      <Grid item xs={12} sx={{ marginLeft: '150px', marginRight: '150px' }}>
+    <Grid container spacing={2} sx={{ marginTop: '40px' }} justifyContent="center">
+      <Grid container item xs={12} md={8} sx={{ marginLeft: '150px', marginRight: '150px' }} justifyContent="center">
+        <Typography variant="h6" sx={{ marginBottom: '20px'}}>Adicionar novo recado</Typography>
         <TextField
           error={descriptionError}
           helperText={descriptionError ? 'Digite uma descrição válida! No mínimo 3 caracteres' : ''}
@@ -73,7 +98,7 @@ const RegisterErrandsForm: React.FC = () => {
           variant="outlined"
         />
       </Grid>
-      <Grid item xs={12} sx={{ marginLeft: '150px', marginRight: '150px' }}>
+      <Grid item xs={12} md={8} sx={{ marginLeft: '150px', marginRight: '150px' }}>
         <TextField
           error={detailsError}
           helperText={detailsError ? 'Digite um detalhamento válido ! No mínimo 3 caracteres' : ''}
@@ -85,12 +110,12 @@ const RegisterErrandsForm: React.FC = () => {
           variant="outlined"
         />
       </Grid>
-      <Grid item xs={12} sx={{ marginLeft: '150px', marginRight: '150px' }}>
+      <Grid item xs={12} md={8} sx={{ marginLeft: '150px', marginRight: '150px' }}>
         <Button onClick={ClearErrands} fullWidth variant="outlined">
           Limpar recado
         </Button>
       </Grid>
-      <Grid item xs={12} sx={{ marginLeft: '150px', marginRight: '150px' }}>
+      <Grid item xs={12} md={8} sx={{ marginLeft: '150px', marginRight: '150px' }}>
         <Button onClick={AddErrands} disabled={descriptionError || detailsError} fullWidth variant="contained">
           Cadastrar recado
         </Button>
