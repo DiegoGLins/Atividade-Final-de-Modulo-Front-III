@@ -3,12 +3,15 @@ import React from 'react';
 import Header from '../Components/Header/Index';
 import ListErrands from '../Components/ListErrandsPage/Index';
 
+
 const Errands: React.FC = () => {
-  
+
   return (
-    <Grid container sx={{ height: '100%'}} justifyContent='center'>
-      <Header/>
-      <Grid item xs={6} justifyContent="center" alignSelf="center" sx={{marginTop: '15px' }}>
+    <Grid container sx={{ height: '100%' }} justifyContent="center" alignItems="center">
+      <Grid item xs={12}>
+        <Header/>
+      </Grid>
+      <Grid item xs={12} justifyContent='center' alignSelf='center'>
         <ListErrands/>
       </Grid>
     </Grid>
