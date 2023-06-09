@@ -1,5 +1,5 @@
-function generateErrandsID() {
+function generateID() {
   return new Date().getTime().toString();
 }
 
-export default generateErrandsID;
+export default generateID;
