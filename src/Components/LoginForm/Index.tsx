@@ -1,12 +1,12 @@
-import { Grid, TextField, Button, Typography, FormControl, Alert, Snackbar, Link } from '@mui/material';
+import { Grid, TextField, Button, Typography, Alert, Snackbar, Link } from '@mui/material';
 import TitleStyled from '../styleds/TitleStyled';
 import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectAll } from '../../store/modules/ListErrandsSlice';
-import UserRegisterType from '../../types/UserRegisterType';
-import { login } from '../../store/modules/RegisterUserSlice';
+
+import { selectAll } from '../../store/modules/registerUserSlice';
+import { userLogged } from '../../store/modules/UserLoggedSlice';
 
 const LoginForm = () => {
   const [accessLogin, setAccessLogin] = useState<string>('');
@@ -14,30 +14,28 @@ const LoginForm = () => {
   const [openSnap, setOpenSnap] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const AllErrands = useAppSelector(selectAll);
-  const AllUsers = useAppSelector(state => state.users.items);
+
+  const usersRedux = useAppSelector(selectAll);
 
   const dispatch = useAppDispatch();
 
-  const LoginSubmit = () => {
-    const LoginUser = AllUsers.find(items => items.email === accessLogin);
-
-    if (LoginUser && LoginUser.password === accessPassword) {
-      const errandsUser = AllErrands.filter(item => item.userId === LoginUser.email);
-      const userLogged: UserRegisterType = {
-        email: accessLogin,
-        password: accessPassword,
-        errands: errandsUser
-      };
-      dispatch(login(userLogged));
-      navigate('/register-errands');
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const userExist = usersRedux.find(userLogin => userLogin.email === accessLogin && userLogin.password === accessPassword);
+  
+    if (userExist) {
+      dispatch(userLogged(accessLogin));
+      navigate('/list-errands');
     } else {
-      setOpenSnap(true);
+      setTimeout(() => {
+        setOpenSnap(true);
+      }, 500);
     }
   };
 
+
   return (
-    <FormControl>
+    <form onSubmit={handleSubmit}>
       <Grid container spacing={2} justifyContent="center">
         <Grid item xs={8}>
           <TitleStyled>
@@ -66,14 +64,14 @@ const LoginForm = () => {
           ></TextField>
         </Grid>
         <Grid item xs={8}>
-          <Button onClick={LoginSubmit} fullWidth variant="contained" color="success">
+          <Button type="submit" fullWidth variant="contained" color="success">
             Login
           </Button>
         </Grid>
         <Grid item container xs={8} display="inline-flex" justifyContent="center" alignContent="center">
           <Typography align="center" variant="body2">
             Ainda não tem conta ?
-            <Link sx={{ padding: '5px' }} href="/registerLogin" underline="none">
+            <Link sx={{ padding: '5px' }} href="/register" underline="none">
               <strong className="TitleRegister" style={{ color: '#10ba32', fontSize: '17px' }}>
                 Criar conta.
               </strong>
@@ -91,7 +89,7 @@ const LoginForm = () => {
           Login ou senha incorretos!
         </Alert>
       </Snackbar>
-    </FormControl>
+    </form>
   );
 };
 
