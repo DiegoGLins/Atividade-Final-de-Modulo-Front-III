@@ -1,111 +1,130 @@
-import { Grid, TextField, Button, FormControl, Alert, Snackbar, Link } from '@mui/material';
-import React, { useState } from 'react';
+import { Grid, TextField, Button, Alert, Snackbar, Link } from '@mui/material';
+import React, { FormEvent, useState } from 'react';
 import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router-dom';
 import TitleStyled from '../styleds/TitleStyled';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { register } from '../../store/modules/RegisterUserSlice';
+import { saveUser, selectAll } from '../../store/modules/registerUserSlice';
 
 const RegisterForm = () => {
-  const [registerLogin, setRegisterLogin] = useState<string>('');
-  const [registerPassword, setRegisterPassword] = useState<string>('');
-  const [repeatRegisterPassword, setRepeatRegisterPassword] = useState<string>('');
-  const [openSnap, setOpenSnap] = useState<boolean>(false);
-  const [finishedTimeout, setFinishedTimeout] = useState<boolean>(false);
-  const [openRegisterEmpty, setRegisterEmpty] = useState<boolean>(false);
-  const [passwordShort, setPasswordShort] = useState<boolean>(false);
-  const [passwordInvalid, setPasswordInvalid] = useState<boolean>(false);
-
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const AllUsers = useAppSelector(state => state.users.items);
+  const userRedux = useAppSelector(selectAll);
 
-  const registerUser = () => {
-    if (registerLogin === '' || registerPassword === '') {
-      setRegisterEmpty(true);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [repeatPassword, setRepeatPassword] = useState<string>('');
+
+  const [openSnap, setOpenSnap] = useState<boolean>(false);
+  const [snapMessage, setSnapMessage] = useState<string>('');
+
+  function registerValidation(): { success: boolean; message: string } {
+    if (!email) {
+      return {
+        success: false,
+        message: 'Email não foi informado!'
+      };
     }
-    else if (registerPassword.length < 4) {
-      setPasswordShort(true);
+    if (!password) {
+      return {
+        success: false,
+        message: 'Senha deve ser informada!'
+      };
+    }
+
+    if (password !== repeatPassword) {
+      return {
+        success: false,
+        message: 'Senhas não são iguais!'
+      };
+    }
+
+    if (findUser) {
+      return {
+        success: true,
+        message: 'Usuário já cadastrado'
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Cadastro realizado com sucesso'
+    };
+  }
+
+  const findUser = userRedux.find(user => user.email === email);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const result = registerValidation();
+    setSnapMessage(result.message);
+    if (result.success) {
+      dispatch(saveUser({ email: email, password: password, errands: [] }));
+      setOpenSnap(true);
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
     } else {
-      const userAlreadyExist = AllUsers.find(item => item.email === registerLogin);
-      if (userAlreadyExist) {
-        setOpenSnap(true);
-      } else {
-        if (registerPassword === repeatRegisterPassword) {
-          dispatch(
-            register({
-              email: registerLogin,
-              password: registerPassword,
-              errands: []
-            })
-          );
-          setFinishedTimeout(true);
-          setTimeout(() => {
-            navigate('/');
-          }, 1000);
-        }
-        else{
-          setPasswordInvalid(true);
-        }
-      }
+      setOpenSnap(true);
     }
   };
 
+
   return (
-    <FormControl>
-      <Grid container spacing={2} justifyContent="center">
-        <Grid item xs={8}>
-          <TitleStyled>
-            <LockIcon />
-          </TitleStyled>
-          <TitleStyled>Crie um email e senha para cadastrar</TitleStyled>
+    <>
+      <form onSubmit={handleSubmit}>
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item xs={8}>
+            <TitleStyled>
+              <LockIcon />
+            </TitleStyled>
+            <TitleStyled>Crie um email e senha para cadastrar</TitleStyled>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              onChange={e => setEmail(e.target.value)}
+              fullWidth
+              type="email"
+              label="crie um email"
+              variant="outlined"
+            ></TextField>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              onChange={e => setPassword(e.target.value)}
+              fullWidth
+              type="password"
+              label="crie uma senha"
+              variant="outlined"
+            ></TextField>
+          </Grid>
+          <Grid item xs={8}>
+            <TextField
+              onChange={e => setRepeatPassword(e.target.value)}
+              fullWidth
+              type="password"
+              label="repita a senha por favor"
+              variant="outlined"
+            ></TextField>
+          </Grid>
+          <Grid item xs={8}>
+            <Button type="submit" fullWidth variant="contained" color="success">
+              Criar conta
+            </Button>
+          </Grid>
+          <Grid item xs={8}>
+            <TitleStyled>
+              Já tem conta ?{' '}
+              <Link sx={{ padding: '5px' }} href="/" underline="none">
+                <strong className="TitleRegister" style={{ color: '#10ba32', fontSize: '17px' }}>
+                  Fazer login.
+                </strong>
+              </Link>
+            </TitleStyled>
+          </Grid>
         </Grid>
-        <Grid item xs={8}>
-          <TextField
-            required
-            onChange={e => setRegisterLogin(e.target.value)}
-            fullWidth
-            type="email"
-            label="crie um email"
-            variant="outlined"
-          ></TextField>
-        </Grid>
-        <Grid item xs={8}>
-          <TextField
-            required
-            onChange={e => setRegisterPassword(e.target.value)}
-            fullWidth
-            type="password"
-            label="crie uma senha"
-            variant="outlined"
-          ></TextField>
-        </Grid>
-        <Grid item xs={8}>
-          <TextField
-            onChange={e => setRepeatRegisterPassword(e.target.value)}
-            fullWidth
-            type="password"
-            label="repita a senha por favor"
-            variant="outlined"
-          ></TextField>
-        </Grid>
-        <Grid item xs={8}>
-          <Button onClick={registerUser} fullWidth variant="contained" color="success">
-            Criar conta
-          </Button>
-        </Grid>
-        <Grid item xs={8}>
-          <TitleStyled>
-            Já tem conta ?{' '}
-            <Link sx={{ padding: '5px' }} href="/" underline="none">
-              <strong className="TitleRegister" style={{ color: '#10ba32', fontSize: '17px' }}>
-                Fazer login.
-              </strong>
-            </Link>
-          </TitleStyled>
-        </Grid>
-      </Grid>
+      </form>
       <Snackbar
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         open={openSnap}
@@ -113,55 +132,10 @@ const RegisterForm = () => {
         onClose={() => setOpenSnap(false)}
       >
         <Alert onClose={() => setOpenSnap(false)} severity="warning" sx={{ width: '100%' }}>
-          Usuário já cadastrado! Faça login para entrar.
+          {snapMessage}
         </Alert>
       </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={finishedTimeout}
-        autoHideDuration={6000}
-        onClose={() => setFinishedTimeout(false)}
-      >
-        <Alert onClose={() => setFinishedTimeout(false)} severity="success" sx={{ width: '100%' }}>
-          Cadastro realizado com sucesso!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={openRegisterEmpty}
-        autoHideDuration={6000}
-        onClose={() => setRegisterEmpty(false)}
-      >
-        <Alert onClose={() => setRegisterEmpty(false)} severity="warning" sx={{ width: '100%' }}>
-          Por favor informe um email e uma senha valida!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={passwordShort}
-        autoHideDuration={6000}
-        onClose={() => setPasswordShort(false)}
-      >
-        <Alert onClose={() => setPasswordShort(false)} severity="warning" sx={{ width: '100%' }}>
-          Por favor insira uma senha com no mínimo 4 caracteres!
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        open={passwordInvalid}
-        autoHideDuration={6000}
-        onClose={() => setPasswordInvalid(false)}
-      >
-        <Alert onClose={() => setPasswordInvalid(false)} severity="warning" sx={{ width: '100%' }}>
-          Senhas não são iguais!
-        </Alert>
-      </Snackbar>
-
-    </FormControl>
+    </>
   );
 };
 
