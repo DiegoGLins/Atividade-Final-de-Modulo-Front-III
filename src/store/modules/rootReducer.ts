@@ -1,11 +1,12 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import userLogged from './UserLoggedSlice';
+import users from './registerUserSlice';
 
 import errands from './ListErrandsSlice';
-import users from './RegisterUserSlice';
+import userLogged from './UserLoggedSlice';
 
 export default combineReducers({
   errands,
-  users,
   userLogged,
+  users,
+
 });
