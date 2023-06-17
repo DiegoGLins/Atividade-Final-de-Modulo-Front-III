@@ -4,7 +4,7 @@ import { RootState } from '../..';
 export interface Errand {
   errandId: string;
   description: string;
-  details: string
+  details: string;
 }
 
 export interface User {
